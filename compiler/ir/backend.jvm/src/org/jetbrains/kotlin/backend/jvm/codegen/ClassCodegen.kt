@@ -69,7 +69,9 @@ open class ClassCodegen protected constructor(
 
     val psiElement = irClass.descriptor.psiElement
 
-    val visitor: ClassBuilder = state.factory.newVisitor(
+    val visitor: ClassBuilder = createClassBuilder()
+
+    open fun createClassBuilder() = state.factory.newVisitor(
         OtherOrigin(psiElement, descriptor),
         type,
         listOf(File(fileEntry.name))

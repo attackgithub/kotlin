@@ -106,8 +106,6 @@ class ExpressionCodegen(
 
     private val state = classCodegen.state
 
-    val returnType = typeMapper.mapReturnType(irFunction)
-
     private val fileEntry = classCodegen.context.psiSourceManager.getFileEntry(irFunction.fileParent)
 
     override val visitor: InstructionAdapter
