@@ -8,11 +8,9 @@ package org.jetbrains.kotlin.backend.jvm.codegen
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns.FQ_NAMES
 import org.jetbrains.kotlin.codegen.*
 import org.jetbrains.kotlin.codegen.state.GenerationState
-import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.expressions.*
-import org.jetbrains.kotlin.ir.types.toKotlinType
 import org.jetbrains.kotlin.ir.util.dump
 import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.ir.util.isAnnotationClass
@@ -217,8 +215,6 @@ private fun markEnumOrInnerConstructorParameterAsSynthetic(mv: MethodVisitor, i:
     val av = mv.visitParameterAnnotation(i, "Ljava/lang/Synthetic;", true)
     av?.visitEnd()
 }
-
-private fun IrFunction.isAccessor() = this is IrSimpleFunction && correspondingPropertySymbol != null
 
 private fun visitAnnotableParameterCount(mv: MethodVisitor, paramCount: Int) {
     mv.visitAnnotableParameterCount(paramCount, true)

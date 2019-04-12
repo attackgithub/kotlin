@@ -69,9 +69,7 @@ open class ClassCodegen protected constructor(
 
     val psiElement = irClass.descriptor.psiElement
 
-    val visitor: ClassBuilder = createClassBuilder()
-
-    open fun createClassBuilder() = state.factory.newVisitor(
+    val visitor: ClassBuilder = state.factory.newVisitor(
         OtherOrigin(psiElement, descriptor),
         type,
         listOf(File(fileEntry.name))
@@ -167,12 +165,6 @@ open class ClassCodegen protected constructor(
     companion object {
         fun generate(irClass: IrClass, context: JvmBackendContext) {
             val state = context.state
-
-//            // We don't have IR error classes, do we? TODO: check with @dmitry.petrov
-//            if (ErrorUtils.isError(descriptor)) {
-//                badClass(irClass, state.classBuilderMode)
-//                return
-//            }
 
             if (irClass.name == SpecialNames.NO_NAME_PROVIDED) {
                 badClass(irClass, state.classBuilderMode)

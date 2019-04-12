@@ -5,17 +5,12 @@
 
 package org.jetbrains.kotlin.backend.jvm.codegen
 
-import org.jetbrains.kotlin.backend.common.ir.ir2string
 import org.jetbrains.kotlin.backend.jvm.JvmLoweredDeclarationOrigin
 import org.jetbrains.kotlin.backend.jvm.intrinsics.JavaClassProperty
 import org.jetbrains.kotlin.backend.jvm.intrinsics.Not
-import org.jetbrains.kotlin.backend.jvm.intrinsics.IrIntrinsicFunction
 import org.jetbrains.kotlin.backend.jvm.lower.CrIrType
-import org.jetbrains.kotlin.builtins.KotlinBuiltIns
-import org.jetbrains.kotlin.backend.jvm.lower.JvmBuiltinOptimizationLowering.Companion.isNegation
 import org.jetbrains.kotlin.codegen.*
 import org.jetbrains.kotlin.codegen.AsmUtil.*
-import org.jetbrains.kotlin.codegen.ExpressionCodegen.putReifiedOperationMarkerIfTypeIsReifiedParameter
 import org.jetbrains.kotlin.codegen.inline.*
 import org.jetbrains.kotlin.codegen.inline.ReifiedTypeInliner.OperationKind.AS
 import org.jetbrains.kotlin.codegen.inline.ReifiedTypeInliner.OperationKind.SAFE_AS
@@ -34,17 +29,11 @@ import org.jetbrains.kotlin.ir.symbols.IrTypeParameterSymbol
 import org.jetbrains.kotlin.ir.types.*
 import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.ir.util.dump
-import org.jetbrains.kotlin.ir.util.isNullConst
 import org.jetbrains.kotlin.ir.util.parentAsClass
 import org.jetbrains.kotlin.ir.util.render
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitor
 import org.jetbrains.kotlin.resolve.jvm.AsmTypes
 import org.jetbrains.kotlin.resolve.jvm.AsmTypes.OBJECT_TYPE
-import org.jetbrains.kotlin.types.KotlinType
-import org.jetbrains.kotlin.types.TypeUtils
-import org.jetbrains.kotlin.types.typeUtil.isNothing
-import org.jetbrains.kotlin.types.typesApproximation.approximateCapturedTypes
-import org.jetbrains.kotlin.types.upperIfFlexible
 import org.jetbrains.kotlin.utils.addToStdlib.firstIsInstanceOrNull
 import org.jetbrains.kotlin.utils.addToStdlib.safeAs
 import org.jetbrains.kotlin.utils.keysToMap
@@ -311,7 +300,7 @@ class ExpressionCodegen(
         isSuperCall: Boolean = false
     ): PromisedValue {
         val callee = expression.symbol.owner
-        val callGenerator = getOrCreateCallGenerator(expression, expression.descriptor, data)
+        val callGenerator = getOrCreateCallGenerator(expression, data)
 
         val receiver = expression.dispatchReceiver
         receiver?.apply {
@@ -653,7 +642,6 @@ class ExpressionCodegen(
         expression.markLineNumber(startOffset = true)
         SwitchGenerator(expression, data, this).generate()?.let { return it }
 
-        val irType = expression.type
         val endLabel = Label()
         for (branch in expression.branches) {
             val elseLabel = Label()
@@ -1059,7 +1047,6 @@ class ExpressionCodegen(
 
     private fun getOrCreateCallGenerator(
         functionAccessExpression: IrFunctionAccessExpression,
-        descriptor: CallableDescriptor,
         data: BlockInfo
     ): IrCallGenerator {
         val callee = functionAccessExpression.symbol.owner
@@ -1185,16 +1172,6 @@ class ExpressionCodegen(
             ReifiedTypeInliner.putReifiedOperationMarker(
                 operationKind, typeParameterAndReificationArgument.second.toReificationArgument(), v
             )
-        }
-    }
-
-    fun IrType.getArrayOrPrimitiveArrayElementType() = (this as? IrSimpleType)?.let {
-        if (this.makeNotNull().isArray()) {
-            assert(arguments.size == 1) { "Array should have one type argument" }
-            arguments[0].safeAs<IrTypeProjection>()?.type
-        } else {
-            val primitiveType = getPrimitiveArrayElementType() ?: error("Not an array type $this")
-            return context.irBuiltIns.primitiveTypeToIrType[primitiveType]!!
         }
     }
 }
