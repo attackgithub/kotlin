@@ -27,6 +27,9 @@ class IrTypeMapper(val kotlinTypeMapper: KotlinTypeMapper) {
     fun mapFieldSignature(irType: IrType, irFrield: IrField) =
         kotlinTypeMapper.mapFieldSignature(irType.toKotlinType(), irFrield.descriptor)
 
+    fun mapFunctionName(irReturnTarget: IrReturnTarget, ownerKind: OwnerKind) =
+        kotlinTypeMapper.mapFunctionName(irReturnTarget.descriptor, ownerKind)
+
     fun mapImplementationOwner(irDeclaration: IrDeclaration) = kotlinTypeMapper.mapImplementationOwner(irDeclaration.descriptor)
 
     fun mapReturnType(irReturnTarget: IrReturnTarget) = kotlinTypeMapper.mapReturnType(irReturnTarget.descriptor)

@@ -413,7 +413,7 @@ class ExpressionCodegen(
         val realField = expression.symbol.owner.resolveFakeOverride()!!
         val fieldType = typeMapper.mapType(realField.type)
         val ownerType = typeMapper.mapImplementationOwner(expression.symbol.owner).internalName
-        val fieldName = expression.descriptor.name.asString()
+        val fieldName = realField.name.asString()
         val isStatic = expression.receiver == null
         expression.markLineNumber(startOffset = true)
         expression.receiver?.accept(this, data)?.materialize()
@@ -611,10 +611,8 @@ class ExpressionCodegen(
     override fun visitReturn(expression: IrReturn, data: BlockInfo): PromisedValue {
         val owner = expression.returnTargetSymbol.owner
         //TODO: should be owner != irFunction
-        val isNonLocalReturn = state.typeMapper.mapFunctionName(
-            owner.descriptor,
-            OwnerKind.IMPLEMENTATION
-        ) != state.typeMapper.mapFunctionName(irFunction.descriptor, OwnerKind.IMPLEMENTATION)
+        val isNonLocalReturn =
+            typeMapper.mapFunctionName(owner, OwnerKind.IMPLEMENTATION) != typeMapper.mapFunctionName(irFunction, OwnerKind.IMPLEMENTATION)
         if (isNonLocalReturn && state.isInlineDisabled) {
             //TODO: state.diagnostics.report(Errors.NON_LOCAL_RETURN_IN_DISABLED_INLINE.on(expression))
             genThrow(
