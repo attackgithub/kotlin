@@ -28,6 +28,8 @@ import java.io.File
 
 private const val MISCONFIGURATION_MESSAGE_SUFFIX = "the plugin is probably applied by a mistake"
 
+const val MIN_SUPPORTED_GRADLE_MAJOR_VERSION = 5
+
 class ScriptingGradleSubplugin : Plugin<Project> {
     companion object {
         fun isEnabled(project: Project) = project.plugins.findPlugin(ScriptingGradleSubplugin::class.java) != null
@@ -56,6 +58,9 @@ class ScriptingGradleSubplugin : Plugin<Project> {
                         try {
                             val discoveryClasspathConfigurationName = getDiscoveryClasspathConfigurationName(task.sourceSetName)
                             project.configurations.findByName(discoveryClasspathConfigurationName)?.let { _ ->
+                                val gradleMajorVersion = project.gradle.gradleVersion.substringBefore('.').toIntOrNull() ?: 0
+                                if (gradleMajorVersion < MIN_SUPPORTED_GRADLE_MAJOR_VERSION)
+                                    throw java.lang.IllegalStateException("supported gradle starting from version $MIN_SUPPORTED_GRADLE_MAJOR_VERSION.0")
                                 configureScriptsExtensions(project, javaPluginConvention, task.sourceSetName)
                             }
                                 ?: project.logger.warn("kotlin scripting plugin: $project.${task.name} - configuration not found: $discoveryClasspathConfigurationName, $MISCONFIGURATION_MESSAGE_SUFFIX")
