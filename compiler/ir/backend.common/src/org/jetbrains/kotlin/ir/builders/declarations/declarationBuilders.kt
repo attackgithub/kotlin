@@ -209,7 +209,7 @@ inline fun IrSimpleFunction.addDispatchReceiver(b: IrValueParameterBuilder.() ->
     IrValueParameterBuilder().run {
         b()
         index = -1
-        name = Name.identifier("\$this")
+        name = "this".synthesizedName
         build().also { receiver ->
             dispatchReceiverParameter = receiver
             receiver.parent = this@addDispatchReceiver
@@ -220,7 +220,7 @@ inline fun IrSimpleFunction.addExtensionReceiver(b: IrValueParameterBuilder.() -
     IrValueParameterBuilder().run {
         b()
         index = -1
-        name = Name.identifier("\$receiver")
+        name = "receiver".synthesizedName
         build().also { receiver ->
             extensionReceiverParameter = receiver
             receiver.parent = this@addExtensionReceiver
